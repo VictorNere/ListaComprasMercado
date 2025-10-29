@@ -146,15 +146,12 @@ document.addEventListener('DOMContentLoaded', () => {
         
         const title = createElement('h2', '', {}, ['Lista de Compras']);
 
-        // --- INÍCIO DOS NOVOS CONTROLES ---
         const controlsContainer = createElement('div', 'list-controls');
         
-        // Barra de Pesquisa
         const searchBar = createElement('div', 'search-bar');
         const searchInput = createElement('input', '', { type: 'text', id: 'search-input', placeholder: 'Pesquisar na lista...' });
         searchBar.appendChild(searchInput);
 
-        // Filtros
         const filterGroup = createElement('div', 'filter-group');
         const valorFilter = createElement('select', '', { id: 'filter-valor' });
         valorFilter.innerHTML = `
@@ -167,10 +164,10 @@ document.addEventListener('DOMContentLoaded', () => {
             <option value="default">Ordenar por...</option>
             <option value="alfa">Ordem Alfabética</option>
             <option value="preco-desc">Mais Caro -> Mais Barato</option>
+            <option value="preco-asc">Mais Barato -> Mais Caro</option>
         `;
         filterGroup.append(valorFilter, sortFilter);
         controlsContainer.append(searchBar, filterGroup);
-        // --- FIM DOS NOVOS CONTROLES ---
 
         const listContent = createElement('ul', 'shopping-list');
         const totalDiv = createElement('div', 'shopping-list-total');
@@ -181,9 +178,6 @@ document.addEventListener('DOMContentLoaded', () => {
         footer.appendChild(closeButton);
 
         
-        // --- INÍCIO DA LÓGICA DE FILTRAGEM DINÂMICA ---
-        
-        // Esta função interna irá redesenhar a lista com base nos filtros
         const updateListView = () => {
             const searchTerm = searchInput.value.toLowerCase();
             const valor = valorFilter.value;
@@ -191,7 +185,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
             let filteredList = [...shoppingList];
 
-            // 1. Filtrar por Pesquisa
             if (searchTerm) {
                 filteredList = filteredList.filter(item => 
                     item.name.toLowerCase().includes(searchTerm) || 
@@ -199,28 +192,27 @@ document.addEventListener('DOMContentLoaded', () => {
                 );
             }
 
-            // 2. Filtrar por Valor (Pago/Pendente)
             if (valor === 'com-valor') {
                 filteredList = filteredList.filter(item => item.paid);
             } else if (valor === 'sem-valor') {
                 filteredList = filteredList.filter(item => !item.paid);
             }
 
-            // 3. Ordenar
             if (sort === 'alfa') {
                 filteredList.sort((a, b) => a.name.localeCompare(b.name));
             } else if (sort === 'preco-desc') {
                 filteredList.sort((a, b) => (b.price || 0) - (a.price || 0));
+            } else if (sort === 'preco-asc') {
+                filteredList.sort((a, b) => (a.price || 0) - (b.price || 0));
             }
 
-            // 4. Limpar e Renderizar a lista
-            listContent.innerHTML = ''; // Limpa a lista antiga
+            listContent.innerHTML = ''; 
 
             if (filteredList.length === 0) {
                  listContent.appendChild(createElement('p', 'empty-list-msg', {}, ['Nenhum item encontrado.']));
             } else {
                 filteredList.forEach((item) => {
-                    const indexInOriginalList = shoppingList.indexOf(item); // Pega o índice original
+                    const indexInOriginalList = shoppingList.indexOf(item); 
                     
                     const isPaid = item.paid ?? false; 
                     const price = item.price ?? 0;   
@@ -255,14 +247,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 });
             }
         };
-        // --- FIM DA LÓGICA DE FILTRAGEM ---
 
-        // Adiciona os "ouvintes" para os filtros
         searchInput.addEventListener('input', updateListView);
         valorFilter.addEventListener('change', updateListView);
         sortFilter.addEventListener('change', updateListView);
 
-        // Monta o modal
         modalContent.append(btnAddInternal, title, controlsContainer, listContent, totalDiv, footer);
         modalContainer.append(modalBackdrop, modalContent);
         document.body.appendChild(modalContainer);
@@ -270,7 +259,6 @@ document.addEventListener('DOMContentLoaded', () => {
         modalBackdrop.addEventListener('click', () => closeAndDestroyModal());
         closeButton.addEventListener('click', () => closeAndDestroyModal());
 
-        // Chama a função pela primeira vez para renderizar a lista
         updateListView();
     };
 
