@@ -181,13 +181,26 @@ footer { text-align: center; padding: 25px; font-size: 0.85rem; color: rgba(255,
 
 /* --- BOTÃO RESET (SÓ ÍCONE E POSIÇÃO MOBILE) --- */
 .reset-btn {
-    position: fixed; top: 20px; left: 20px; background: none; border: none; padding: 5px;
-    color: rgba(255, 255, 255, 0.4); cursor: pointer; z-index: 990;
-    display: flex; justify-content: center; align-items: center;
+    position: fixed;
+    top: 20px;
+    left: 20px;
+    
+    /* ANULAÇÕES IMPORTANTES */
+    background: none;
+    border: none;
+    padding: 5px;     /* Anula o padding "comprido" */
+    min-width: auto;  /* Anula a largura "comprida" */
+
+    color: rgba(255, 255, 255, 0.4);
+    cursor: pointer;
+    z-index: 990;
+    display: flex;
+    justify-content: center;
+    align-items: center;
     transition: color 0.2s ease, transform 0.2s ease;
 }
 .reset-btn svg { width: 26px; height: 26px; stroke: currentColor; }
-.reset-btn:hover { color: #ffffff; transform: scale(1.15); } /* Efeito sutil no hover */
+.reset-btn:hover { color: #ffffff; transform: scale(1.15); }
 
 /* --- BOTÃO FECHAR NOS MODAIS (CENTRALIZADO) --- */
 .modal-footer { text-align: center; margin-top: 25px; padding-top: 18px; border-top: 1px solid rgba(255, 255, 255, 0.1); flex-shrink: 0; }
