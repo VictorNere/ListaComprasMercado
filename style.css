@@ -5,7 +5,8 @@ body {
     display: flex; flex-direction: column; color: #f0f0f0;
     background-color: #090a0f;
     background-image: radial-gradient(ellipse at bottom, #1b2735 0%, #090a0f 100%);
-    overflow-x: hidden; padding-bottom: 80px;
+    overflow-x: hidden; 
+    /* padding-bottom: 80px; */ /* <-- ESTA LINHA FOI REMOVIDA */
 }
 .container { flex: 1; display: flex; justify-content: center; align-items: center; padding: 20px; }
 .button-group { display: flex; flex-wrap: wrap; justify-content: center; gap: 30px; }
@@ -199,7 +200,8 @@ footer { text-align: center; padding: 25px; font-size: 0.85rem; color: rgba(255,
 
 /* --- MEDIA QUERIES --- */
 @media (max-width: 650px) {
-    body { padding-bottom: 90px; }
+    /* ESTA É A REGRA QUE AGORA CONTÉM O PADDING */
+    body { padding-bottom: 90px; } 
     .button-group button { width: 100%; min-width: unset; padding: 18px 25px; font-size: 1rem; gap: 10px;}
     .icon { width: 20px; height: 20px; }
     .reset-btn { top: auto; bottom: 15px; left: 50%; transform: translateX(-50%); }
