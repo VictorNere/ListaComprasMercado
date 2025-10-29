@@ -6,7 +6,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let currentTotal = 0.0;
 
     // --- Seletores de Elementos Principais ---
-    const btnAcessar = document.getElementById('btn-acessar'); // NOVO
+    const btnAcessar = document.getElementById('btn-acessar'); 
     const btnReset = document.getElementById('btn-reset');
 
     // --- Funções Auxiliares ---
@@ -75,7 +75,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
      // --- Funções de Criação de Modais ---
     const createAddModal = () => {
-        // ATUALIZADO: Adiciona classe 'add-modal' e z-index para ficar sobre a lista
         const modalContainer = createElement('div', 'modal-container add-modal', { style: 'z-index: 1010;' });
         const modalBackdrop = createElement('div', 'modal-backdrop', { style: 'z-index: 1011;' });
         const modalContent = createElement('div', 'modal-content', { style: 'max-width: 550px; z-index: 1012;' });
@@ -100,7 +99,6 @@ document.addEventListener('DOMContentLoaded', () => {
         modalContainer.append(modalBackdrop, modalContent);
         document.body.appendChild(modalContainer);
 
-        // ATUALIZADO: Fecha apenas o modal .add-modal
         modalBackdrop.addEventListener('click', () => closeAndDestroyModal('.add-modal')); 
         form.addEventListener('submit', addItemToList);
         closeButton.addEventListener('click', () => closeAndDestroyModal('.add-modal'));
@@ -124,94 +122,158 @@ document.addEventListener('DOMContentLoaded', () => {
         shoppingList.push({ name: itemName, quantity: itemQty, observation: itemObs, paid: false, price: 0 });
         saveListToStorage();
         
-        itemNameInput.value = ''; itemQtyInput.value = '1'; itemObsInput.value = '';
-        itemNameInput.focus(); 
-        
-        // ATUALIZADO: Recarrega a lista principal em segundo plano
         recalculateTotal();
-        closeAndDestroyModal('.modal-container'); // Fecha o modal da lista
-        createMainListModal(); // Recria o modal da lista
+        closeAndDestroyModal('.modal-container'); 
+        createMainListModal(); 
         
-        // ATUALIZADO: Fecha o modal de adicionar após adicionar
         closeAndDestroyModal('.add-modal');
     };
 
-    // ATUALIZADO: Renomeado de createShoppingListModal para createMainListModal
+    
     const createMainListModal = () => {
         stopAllParticles();
         recalculateTotal();
         
         const modalContainer = createElement('div', 'modal-container');
         const modalBackdrop = createElement('div', 'modal-backdrop');
-        // ATUALIZADO: Adiciona a classe .modal-main-list
         const modalContent = createElement('div', 'modal-content modal-main-list');
         
-        // NOVO: Botão Adicionar Interno
         const btnAddInternal = createElement('button', 'btn-add-internal', { title: 'Adicionar Item' });
         btnAddInternal.innerHTML = `<svg class="icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v12m6-6H6" /></svg>`;
         btnAddInternal.addEventListener('click', () => {
-            createAddModal(); // Abre o modal de adicionar por cima
+            createAddModal(); 
         });
         
         const title = createElement('h2', '', {}, ['Lista de Compras']);
+
+        // --- INÍCIO DOS NOVOS CONTROLES ---
+        const controlsContainer = createElement('div', 'list-controls');
         
-        let listContent;
-        if (shoppingList.length === 0) {
-            listContent = createElement('p', 'empty-list-msg', {}, ['Sua lista está vazia.']);
-        } else {
-            listContent = createElement('ul', 'shopping-list');
-            shoppingList.forEach((item, index) => {
-                const isPaid = item.paid ?? false; 
-                const price = item.price ?? 0;   
-                const quantity = item.quantity || 1; 
-                const observation = item.observation || ''; 
-                const name = item.name || 'Item Inválido';
+        // Barra de Pesquisa
+        const searchBar = createElement('div', 'search-bar');
+        const searchInput = createElement('input', '', { type: 'text', id: 'search-input', placeholder: 'Pesquisar na lista...' });
+        searchBar.appendChild(searchInput);
 
-                const li = createElement('li', `shopping-list-item ${isPaid ? 'paid' : ''}`);
-                const itemInfo = createElement('div', 'item-info');
-                itemInfo.innerHTML = `<span class="item-name">${name} <span class="item-qty">(x${quantity})</span></span> ${observation ? `<span class="item-obs">${observation}</span>` : ''}`;
-                
-                const itemActions = createElement('div', 'item-actions');
-                
-                const payButton = createElement('button', 'btn-pagar-item', { 
-                    'data-index': index, 
-                    title: 'Pagar', 
-                    disabled: isPaid 
-                });
-                payButton.innerHTML = isPaid ? `R$&nbsp;${price.toFixed(2)}` : `<span>R$</span>`; 
-                payButton.addEventListener('click', (e) => {
-                    if (e.currentTarget.disabled) return; 
-                    createPriceModal(e.currentTarget.dataset.index);
-                });
+        // Filtros
+        const filterGroup = createElement('div', 'filter-group');
+        const valorFilter = createElement('select', '', { id: 'filter-valor' });
+        valorFilter.innerHTML = `
+            <option value="todos">Com/Sem Valor</option>
+            <option value="com-valor">Com Valor (Pagos)</option>
+            <option value="sem-valor">Sem Valor (Pendentes)</option>
+        `;
+        const sortFilter = createElement('select', '', { id: 'filter-sort' });
+        sortFilter.innerHTML = `
+            <option value="default">Ordenar por...</option>
+            <option value="alfa">Ordem Alfabética</option>
+            <option value="preco-desc">Mais Caro -> Mais Barato</option>
+        `;
+        filterGroup.append(valorFilter, sortFilter);
+        controlsContainer.append(searchBar, filterGroup);
+        // --- FIM DOS NOVOS CONTROLES ---
 
-                const editButton = createElement('button', 'btn-editar-item', { 'data-index': index, title: 'Editar' });
-                editButton.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L6.832 19.82a4.5 4.5 0 0 1-1.897 1.13l-2.685.8.8-2.685a4.5 4.5 0 0 1 1.13-1.897L16.863 4.487Zm0 0L19.5 7.125" /></svg>`;
-                editButton.addEventListener('click', (e) => createEditModal(e.currentTarget.dataset.index));
-
-                const deleteButton = createElement('button', 'btn-excluir-item', { 'data-index': index, title: 'Excluir' });
-                deleteButton.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0" /></svg>`;
-                deleteButton.addEventListener('click', (e) => deleteItem(e.currentTarget.dataset.index));
-
-                itemActions.append(payButton, editButton, deleteButton);
-                li.append(itemInfo, itemActions);
-                listContent.appendChild(li);
-            });
-        }
-
+        const listContent = createElement('ul', 'shopping-list');
         const totalDiv = createElement('div', 'shopping-list-total');
         totalDiv.innerHTML = `Total: <span>R$ ${currentTotal.toFixed(2)}</span>`;
+        
         const footer = createElement('div', 'modal-footer');
         const closeButton = createElement('button', 'modal-close-footer-btn', { type: 'button' }, ['Fechar']);
         footer.appendChild(closeButton);
 
-        // ATUALIZADO: Adiciona o btnAddInternal junto com o título
-        modalContent.append(btnAddInternal, title, listContent, totalDiv, footer);
+        
+        // --- INÍCIO DA LÓGICA DE FILTRAGEM DINÂMICA ---
+        
+        // Esta função interna irá redesenhar a lista com base nos filtros
+        const updateListView = () => {
+            const searchTerm = searchInput.value.toLowerCase();
+            const valor = valorFilter.value;
+            const sort = sortFilter.value;
+
+            let filteredList = [...shoppingList];
+
+            // 1. Filtrar por Pesquisa
+            if (searchTerm) {
+                filteredList = filteredList.filter(item => 
+                    item.name.toLowerCase().includes(searchTerm) || 
+                    item.observation.toLowerCase().includes(searchTerm)
+                );
+            }
+
+            // 2. Filtrar por Valor (Pago/Pendente)
+            if (valor === 'com-valor') {
+                filteredList = filteredList.filter(item => item.paid);
+            } else if (valor === 'sem-valor') {
+                filteredList = filteredList.filter(item => !item.paid);
+            }
+
+            // 3. Ordenar
+            if (sort === 'alfa') {
+                filteredList.sort((a, b) => a.name.localeCompare(b.name));
+            } else if (sort === 'preco-desc') {
+                filteredList.sort((a, b) => (b.price || 0) - (a.price || 0));
+            }
+
+            // 4. Limpar e Renderizar a lista
+            listContent.innerHTML = ''; // Limpa a lista antiga
+
+            if (filteredList.length === 0) {
+                 listContent.appendChild(createElement('p', 'empty-list-msg', {}, ['Nenhum item encontrado.']));
+            } else {
+                filteredList.forEach((item) => {
+                    const indexInOriginalList = shoppingList.indexOf(item); // Pega o índice original
+                    
+                    const isPaid = item.paid ?? false; 
+                    const price = item.price ?? 0;   
+                    const quantity = item.quantity || 1; 
+                    const observation = item.observation || ''; 
+                    const name = item.name || 'Item Inválido';
+
+                    const li = createElement('li', `shopping-list-item ${isPaid ? 'paid' : ''}`);
+                    const itemInfo = createElement('div', 'item-info');
+                    itemInfo.innerHTML = `<span class="item-name">${name} <span class="item-qty">(x${quantity})</span></span> ${observation ? `<span class="item-obs">${observation}</span>` : ''}`;
+                    
+                    const itemActions = createElement('div', 'item-actions');
+                    
+                    const payButton = createElement('button', 'btn-pagar-item', { 'data-index': indexInOriginalList, title: 'Pagar', disabled: isPaid });
+                    payButton.innerHTML = isPaid ? `R$&nbsp;${price.toFixed(2)}` : `<span>R$</span>`; 
+                    payButton.addEventListener('click', (e) => {
+                        if (e.currentTarget.disabled) return; 
+                        createPriceModal(e.currentTarget.dataset.index);
+                    });
+
+                    const editButton = createElement('button', 'btn-editar-item', { 'data-index': indexInOriginalList, title: 'Editar' });
+                    editButton.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L6.832 19.82a4.5 4.5 0 0 1-1.897 1.13l-2.685.8.8-2.685a4.5 4.5 0 0 1 1.13-1.897L16.863 4.487Zm0 0L19.5 7.125" /></svg>`;
+                    editButton.addEventListener('click', (e) => createEditModal(e.currentTarget.dataset.index));
+
+                    const deleteButton = createElement('button', 'btn-excluir-item', { 'data-index': indexInOriginalList, title: 'Excluir' });
+                    deleteButton.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0" /></svg>`;
+                    deleteButton.addEventListener('click', (e) => deleteItem(e.currentTarget.dataset.index));
+
+                    itemActions.append(payButton, editButton, deleteButton);
+                    li.append(itemInfo, itemActions);
+                    listContent.appendChild(li);
+                });
+            }
+        };
+        // --- FIM DA LÓGICA DE FILTRAGEM ---
+
+        // Adiciona os "ouvintes" para os filtros
+        searchInput.addEventListener('input', updateListView);
+        valorFilter.addEventListener('change', updateListView);
+        sortFilter.addEventListener('change', updateListView);
+
+        // Monta o modal
+        modalContent.append(btnAddInternal, title, controlsContainer, listContent, totalDiv, footer);
         modalContainer.append(modalBackdrop, modalContent);
         document.body.appendChild(modalContainer);
 
         modalBackdrop.addEventListener('click', () => closeAndDestroyModal());
         closeButton.addEventListener('click', () => closeAndDestroyModal());
+
+        // Chama a função pela primeira vez para renderizar a lista
+        updateListView();
     };
+
 
     const createEditModal = (index) => { 
         const itemIndex = parseInt(index, 10);
@@ -274,8 +336,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
         saveListToStorage();
         closeAndDestroyModal('.edit-modal');
-        closeAndDestroyModal('.modal-container'); // Fecha a lista principal
-        createMainListModal(); // ATUALIZADO: Recria a lista principal
+        closeAndDestroyModal('.modal-container'); 
+        createMainListModal(); 
     };
 
     const deleteItem = (index) => { 
@@ -287,7 +349,7 @@ document.addEventListener('DOMContentLoaded', () => {
             saveListToStorage();
             recalculateTotal(); 
             closeAndDestroyModal('.modal-container'); 
-            createMainListModal(); // ATUALIZADO: Recria a lista principal
+            createMainListModal(); 
         }
     };
 
@@ -341,8 +403,8 @@ document.addEventListener('DOMContentLoaded', () => {
         saveListToStorage();
         
         closeAndDestroyModal('.price-modal');
-        closeAndDestroyModal('.modal-container'); // Fecha modal da lista
-        createMainListModal(); // ATUALIZADO: Recria modal da lista
+        closeAndDestroyModal('.modal-container'); 
+        createMainListModal(); 
     };
 
     const resetData = () => { 
@@ -353,7 +415,6 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     // --- Inicialização e Event Listeners Principais ---
-    // ATUALIZADO: Remove listeners antigos, adiciona o novo
     btnAcessar.addEventListener('click', () => { stopAllParticles(); createMainListModal(); });
     btnReset.addEventListener('click', resetData);
     loadListFromStorage(); 

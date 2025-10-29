@@ -6,7 +6,6 @@ body {
     background-color: #090a0f;
     background-image: radial-gradient(ellipse at bottom, #1b2735 0%, #090a0f 100%);
     overflow-x: hidden; 
-    /* padding-bottom: 80px; */ /* <-- ESTA LINHA FOI REMOVIDA */
 }
 .container { flex: 1; display: flex; justify-content: center; align-items: center; padding: 20px; }
 .button-group { display: flex; flex-wrap: wrap; justify-content: center; gap: 30px; }
@@ -64,18 +63,18 @@ footer { text-align: center; padding: 25px; font-size: 0.85rem; color: rgba(255,
     max-height: 90vh; display: flex; flex-direction: column;
 }
 
-/* NOVO: Modal Grande (Lista Principal) */
+/* Modal Grande (Lista Principal) */
 .modal-main-list {
     width: 80vw;
     height: 80vh;
     max-width: 1200px;
-    padding-top: 80px; /* Mais espaço no topo para o botão Adicionar */
+    padding-top: 80px; 
 }
 .modal-main-list h2 {
-    padding-left: 60px; /* Afasta o título do botão Adicionar */
+    padding-left: 60px; 
 }
 
-/* NOVO: Botão Adicionar (Dentro do Modal da Lista) */
+/* Botão Adicionar (Dentro do Modal da Lista) */
 .btn-add-internal {
     position: absolute;
     top: 22px;
@@ -100,10 +99,51 @@ footer { text-align: center; padding: 25px; font-size: 0.85rem; color: rgba(255,
     color: #5eeada;
     transform: scale(1.1);
 }
-/* FIM DAS NOVAS REGRAS */
-
 
 .modal-content h2 { text-align: center; font-weight: 600; margin-bottom: 20px; font-size: 1.4rem; flex-shrink: 0; }
+
+/* --- NOVO: Barra de Pesquisa e Filtros --- */
+.list-controls {
+    display: flex;
+    flex-wrap: wrap; /* Permite quebrar linha no celular */
+    gap: 15px;
+    margin-bottom: 20px;
+    padding: 0 5px;
+    flex-shrink: 0;
+}
+.search-bar {
+    flex-grow: 1; /* Ocupa o espaço disponível */
+    min-width: 200px; /* Largura mínima */
+}
+.search-bar input {
+    width: 100%;
+    font-family: 'Inter', sans-serif; font-size: 0.95rem; padding: 10px 15px;
+    border: 1px solid rgba(255, 255, 255, 0.15); background: rgba(0, 0, 0, 0.25);
+    color: #ffffff; border-radius: 10px; outline: none; transition: all 0.2s ease;
+}
+.search-bar input:focus {
+    border-color: rgba(35, 213, 171, 0.7); box-shadow: 0 0 10px rgba(35, 213, 171, 0.15);
+}
+
+.filter-group {
+    display: flex;
+    gap: 10px;
+    flex-shrink: 0; /* Não encolhe */
+}
+.filter-group select {
+    font-family: 'Inter', sans-serif; font-size: 0.9rem; padding: 10px 12px;
+    border: 1px solid rgba(255, 255, 255, 0.15); background: rgba(0, 0, 0, 0.25);
+    color: #ffffff; border-radius: 10px; outline: none;
+    -moz-appearance: none; -webkit-appearance: none; appearance: none;
+    background-image: url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2020%2020%22%20fill%3D%22%23999%22%3E%3Cpath%20fill-rule%3D%22evenodd%22%20d%3D%22M5.293%207.293a1%201%200%20011.414%200L10%2010.586l3.293-3.293a1%201%200%20111.414%201.414l-4%204a1%201%200%2001-1.414%200l-4-4a1%201%200%20010-1.414z%22%20clip-rule%3D%22evenodd%22%2F%3E%3C%2Fsvg%3E');
+    background-repeat: no-repeat;
+    background-position: right 10px center;
+    background-size: 1.2em;
+    padding-right: 35px; /* Espaço para a seta */
+    cursor: pointer;
+}
+/* --- FIM DOS NOVOS ESTILOS --- */
+
 
 #add-item-form, #edit-item-form { display: flex; flex-direction: column; gap: 18px; overflow-y: auto; flex-grow: 1; padding-right: 5px; }
 .form-group { display: flex; flex-direction: column; gap: 6px; }
@@ -153,19 +193,17 @@ footer { text-align: center; padding: 25px; font-size: 0.85rem; color: rgba(255,
 
 .item-actions button:hover { background: rgba(255, 255, 255, 0.15); color: #ffffff; transform: scale(1.1); }
 .item-actions button:disabled { color: rgba(255, 255, 255, 0.3); background: rgba(255, 255, 255, 0.05); cursor: not-allowed; transform: none; border-color: rgba(255, 255, 255, 0.05); }
-/* CORREÇÃO: Impede o hover no botão desabilitado */
 .item-actions button:disabled:hover { background: rgba(255, 255, 255, 0.05); transform: none; color: rgba(255, 255, 255, 0.3); }
 
 
 /* Botão Pagar com R$ */
 .btn-pagar-item { color: #23d5ab; background: rgba(35, 213, 171, 0.15); border-color: rgba(35, 213, 171, 0.3); }
 .btn-pagar-item:hover { background: rgba(35, 213, 171, 0.3); color: #5eeada; }
-.btn-pagar-item:disabled { /* Mostra o preço quando desabilitado */
+.btn-pagar-item:disabled { 
     background: rgba(85, 85, 85, 0.2); color: #888; border: 1px solid rgba(85, 85, 85, 0.3);
     font-size: 0.8rem; font-weight: normal; padding: 5px; height: auto; width: auto; min-width: 55px;
     cursor: default;
 }
-/* CORREÇÃO: Garante que hover não afete desabilitado */
 .btn-pagar-item:disabled:hover { background: rgba(85, 85, 85, 0.2); transform: none; color: #888; }
 
 .btn-editar-item:hover { background: rgba(96, 165, 250, 0.15); color: #60a5fa; } /* Azul */
@@ -213,26 +251,23 @@ footer { text-align: center; padding: 25px; font-size: 0.85rem; color: rgba(255,
 
 /* --- MEDIA QUERIES --- */
 @media (max-width: 650px) {
-    /* ESTA É A REGRA QUE AGORA CONTÉM O PADDING */
     body { padding-bottom: 90px; } 
     .button-group button { width: 100%; min-width: unset; padding: 18px 25px; font-size: 1rem; gap: 10px;}
     .icon { width: 20px; height: 20px; }
     .reset-btn { top: auto; bottom: 15px; left: 50%; transform: translateX(-50%); }
-    .reset-btn:hover { transform: translateX(-50%) scale(1.15); } /* Mantém centralizado */
+    .reset-btn:hover { transform: translateX(-50%) scale(1.15); } 
     
-    /* Modal Padrão (Add/Edit) no Celular */
     .modal-content { max-width: 95%; padding: 20px 20px; max-height: 85vh;}
     
-    /* Modal Grande (Lista) no Celular */
     .modal-main-list {
         width: 95vw;
         height: 85vh;
-        padding-top: 70px; /* Ajuste para celular */
+        padding-top: 70px; 
     }
     .modal-main-list h2 {
         font-size: 1.3rem; 
         margin-bottom: 15px;
-        padding-left: 50px; /* Ajuste para celular */
+        padding-left: 50px; 
     }
     .btn-add-internal {
         top: 18px;
@@ -241,6 +276,16 @@ footer { text-align: center; padding: 25px; font-size: 0.85rem; color: rgba(255,
         height: 36px;
     }
     .btn-add-internal .icon { width: 18px; height: 18px; }
+
+    /* Ajustes dos filtros para celular */
+    .list-controls { gap: 10px; margin-bottom: 15px; }
+    .search-bar { min-width: 150px; } 
+    .filter-group { 
+        width: 100%; 
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+    }
+    .filter-group select { width: 100%; font-size: 0.85rem; }
 
     #add-item-form, #edit-item-form { gap: 15px; }
     .form-group input { font-size: 1rem; padding: 12px 15px; }
@@ -266,7 +311,7 @@ footer { text-align: center; padding: 25px; font-size: 0.85rem; color: rgba(255,
     .item-obs { font-size: 0.8rem; }
     .item-actions button { width: 36px; height: 36px; }
     .item-actions button svg { width: 18px; height: 18px; }
-    .btn-pagar-item { font-size: 1rem; width: auto; min-width: 36px; padding: 0 8px;} /* Ajuste para caber R$ */
+    .btn-pagar-item { font-size: 1rem; width: auto; min-width: 36px; padding: 0 8px;} 
     .btn-pagar-item:disabled { font-size: 0.75rem; min-width: 45px; padding: 5px; }
     .shopping-list-total { font-size: 1.1rem; margin-top: 20px; padding-top: 15px;}
     .modal-footer { margin-top: 20px; padding-top: 15px;}
