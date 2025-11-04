@@ -173,10 +173,28 @@ document.addEventListener('DOMContentLoaded', () => {
         const totalDiv = createElement('div', 'shopping-list-total');
         totalDiv.innerHTML = `Total: <span>R$ ${currentTotal.toFixed(2)}</span>`;
         
+        // --- INÍCIO DA ATUALIZAÇÃO DO RODAPÉ ---
         const footer = createElement('div', 'modal-footer');
+            
+        // Botões de Ação (Import/Export)
+        const footerActionsLeft = createElement('div', 'footer-actions-left');
+        const btnImport = createElement('button', 'modal-close-footer-btn', { title: 'Importar lista' }, ['Importar']);
+        const btnExport = createElement('button', 'modal-close-footer-btn', { title: 'Exportar lista' }, ['Exportar']);
+        const importInput = createElement('input', 'hidden-file-input', { type: 'file', accept: '.json' });
+        
+        btnImport.addEventListener('click', () => importInput.click());
+        btnExport.addEventListener('click', exportList);
+        importInput.addEventListener('change', (e) => importList(e));
+        
+        footerActionsLeft.append(btnImport, btnExport, importInput);
+        
+        // Botão Fechar
         const closeButton = createElement('button', 'modal-close-footer-btn', { type: 'button' }, ['Fechar']);
-        footer.appendChild(closeButton);
+        closeButton.addEventListener('click', () => closeAndDestroyModal());
 
+        footer.append(footerActionsLeft, closeButton);
+        // --- FIM DA ATUALIZAÇÃO DO RODAPÉ ---
+        
         
         const updateListView = () => {
             const searchTerm = searchInput.value.toLowerCase();
@@ -401,6 +419,78 @@ document.addEventListener('DOMContentLoaded', () => {
             location.reload(); 
         }
     };
+
+    // --- NOVO: Funções de Import/Export ---
+    const exportList = () => {
+        if (shoppingList.length === 0) {
+            alert("Sua lista está vazia. Adicione itens antes de exportar.");
+            return;
+        }
+        
+        const jsonString = JSON.stringify(shoppingList, null, 2);
+        const blob = new Blob([jsonString], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        
+        const a = createElement('a', '', { 
+            href: url, 
+            download: 'lista-de-compras.json' 
+        });
+        
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+    };
+
+    const importList = (event) => {
+        const file = event.target.files[0];
+        if (!file) return;
+
+        if (!file.type.includes('json')) {
+            alert('Erro: O arquivo selecionado não é .json.');
+            event.target.value = null; // Reseta o input
+            return;
+        }
+        
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            try {
+                const importedList = JSON.parse(e.target.result);
+                
+                if (!Array.isArray(importedList)) {
+                    throw new Error('O arquivo não contém uma lista (array) válida.');
+                }
+
+                if (window.confirm("Isso irá substituir sua lista atual. Deseja continuar?")) {
+                    // Sanitiza a lista importada (mesma lógica do loadListFromStorage)
+                    shoppingList = importedList.map(item => ({
+                         name: item.name || 'Nome Inválido',
+                         quantity: item.quantity || 1,
+                         observation: item.observation || '',
+                         paid: item.paid || false,
+                         price: item.price || 0
+                     }));
+                    
+                    saveListToStorage();
+                    recalculateTotal();
+                    
+                    // Recarrega o modal principal
+                    closeAndDestroyModal('.modal-container');
+                    createMainListModal();
+                }
+                
+            } catch (error) {
+                console.error("Erro ao importar:", error);
+                alert("Erro ao ler o arquivo. Verifique se o JSON é válido.");
+            } finally {
+                event.target.value = null; // Reseta o input para permitir importar o mesmo arquivo de novo
+            }
+        };
+        
+        reader.readAsText(file);
+    };
+    // --- FIM DAS NOVAS FUNÇÕES ---
+
 
     // --- Inicialização e Event Listeners Principais ---
     btnAcessar.addEventListener('click', () => { stopAllParticles(); createMainListModal(); });

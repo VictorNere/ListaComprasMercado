@@ -102,18 +102,18 @@ footer { text-align: center; padding: 25px; font-size: 0.85rem; color: rgba(255,
 
 .modal-content h2 { text-align: center; font-weight: 600; margin-bottom: 20px; font-size: 1.4rem; flex-shrink: 0; }
 
-/* --- NOVO: Barra de Pesquisa e Filtros --- */
+/* --- Barra de Pesquisa e Filtros --- */
 .list-controls {
     display: flex;
-    flex-wrap: wrap; /* Permite quebrar linha no celular */
+    flex-wrap: wrap; 
     gap: 15px;
     margin-bottom: 20px;
     padding: 0 5px;
     flex-shrink: 0;
 }
 .search-bar {
-    flex-grow: 1; /* Ocupa o espaço disponível */
-    min-width: 200px; /* Largura mínima */
+    flex-grow: 1; 
+    min-width: 200px; 
 }
 .search-bar input {
     width: 100%;
@@ -128,7 +128,7 @@ footer { text-align: center; padding: 25px; font-size: 0.85rem; color: rgba(255,
 .filter-group {
     display: flex;
     gap: 10px;
-    flex-shrink: 0; /* Não encolhe */
+    flex-shrink: 0; 
 }
 .filter-group select {
     font-family: 'Inter', sans-serif; font-size: 0.9rem; padding: 10px 12px;
@@ -139,11 +139,9 @@ footer { text-align: center; padding: 25px; font-size: 0.85rem; color: rgba(255,
     background-repeat: no-repeat;
     background-position: right 10px center;
     background-size: 1.2em;
-    padding-right: 35px; /* Espaço para a seta */
+    padding-right: 35px; 
     cursor: pointer;
 }
-/* --- FIM DOS NOVOS ESTILOS --- */
-
 
 #add-item-form, #edit-item-form { display: flex; flex-direction: column; gap: 18px; overflow-y: auto; flex-grow: 1; padding-right: 5px; }
 .form-group { display: flex; flex-direction: column; gap: 6px; }
@@ -157,7 +155,7 @@ footer { text-align: center; padding: 25px; font-size: 0.85rem; color: rgba(255,
 .form-group input[type=number] { -moz-appearance: textfield; appearance: textfield; }
 .form-group input::-webkit-outer-spin-button, .form-group input::-webkit-inner-spin-button { -webkit-appearance: none; appearance: none; margin: 0; }
 
-.modal-add-btn, .modal-save-btn { /* Botões Adicionar, Salvar, Confirmar */
+.modal-add-btn, .modal-save-btn { 
     background: #23d5ab; color: #090a0f; border: none; padding: 14px; font-size: 1rem; font-weight: 600;
     border-radius: 10px; cursor: pointer; transition: all 0.2s ease;
     display: flex; align-items: center; justify-content: center; gap: 8px;
@@ -181,15 +179,15 @@ footer { text-align: center; padding: 25px; font-size: 0.85rem; color: rgba(255,
 .empty-list-msg { text-align: center; font-size: 1rem; color: rgba(255, 255, 255, 0.6); padding: 30px 0; flex-grow: 1; display: flex; align-items: center; justify-content: center; }
 
 .item-actions { display: flex; gap: 8px; flex-shrink: 0; }
-.item-actions button { /* Base para botões de ação */
+.item-actions button { 
     background: rgba(255, 255, 255, 0.08); border: 1px solid rgba(255, 255, 255, 0.1);
     color: rgba(255, 255, 255, 0.6); padding: 0; margin: 0;
     min-width: auto; width: 36px; height: 36px; border-radius: 8px; cursor: pointer;
     transition: all 0.2s ease; display: flex; justify-content: center; align-items: center; box-shadow: none;
-    font-size: 1.1rem; /* Tamanho base para R$ */
+    font-size: 1.1rem; 
 }
-.item-actions button svg { width: 18px; height: 18px; } /* Ícones menores */
-.item-actions button span { font-weight: bold; line-height: 1; } /* Estilo para R$ */
+.item-actions button svg { width: 18px; height: 18px; } 
+.item-actions button span { font-weight: bold; line-height: 1; } 
 
 .item-actions button:hover { background: rgba(255, 255, 255, 0.15); color: #ffffff; transform: scale(1.1); }
 .item-actions button:disabled { color: rgba(255, 255, 255, 0.3); background: rgba(255, 255, 255, 0.05); cursor: not-allowed; transform: none; border-color: rgba(255, 255, 255, 0.05); }
@@ -206,8 +204,8 @@ footer { text-align: center; padding: 25px; font-size: 0.85rem; color: rgba(255,
 }
 .btn-pagar-item:disabled:hover { background: rgba(85, 85, 85, 0.2); transform: none; color: #888; }
 
-.btn-editar-item:hover { background: rgba(96, 165, 250, 0.15); color: #60a5fa; } /* Azul */
-.btn-excluir-item:hover { background: rgba(248, 113, 113, 0.15); color: #f87171; } /* Vermelho */
+.btn-editar-item:hover { background: rgba(96, 165, 250, 0.15); color: #60a5fa; } 
+.btn-excluir-item:hover { background: rgba(248, 113, 113, 0.15); color: #f87171; } 
 
 /* --- Modal de Preço --- */
 #price-form { display: flex; flex-direction: column; gap: 18px; }
@@ -223,11 +221,10 @@ footer { text-align: center; padding: 25px; font-size: 0.85rem; color: rgba(255,
     top: 20px;
     left: 20px;
     
-    /* ANULAÇÕES IMPORTANTES */
     background: none;
     border: none;
-    padding: 5px;     /* Anula o padding "comprido" */
-    min-width: auto;  /* Anula a largura "comprida" */
+    padding: 5px;     
+    min-width: auto;  
 
     color: rgba(255, 255, 255, 0.4);
     cursor: pointer;
@@ -241,13 +238,33 @@ footer { text-align: center; padding: 25px; font-size: 0.85rem; color: rgba(255,
 .reset-btn:hover { color: #ffffff; transform: scale(1.15); }
 
 /* --- BOTÃO FECHAR NOS MODAIS (CENTRALIZADO) --- */
-.modal-footer { text-align: center; margin-top: 25px; padding-top: 18px; border-top: 1px solid rgba(255, 255, 255, 0.1); flex-shrink: 0; }
+.modal-footer {
+    /* text-align: center; */ /* REMOVIDO */
+    display: flex; /* ADICIONADO */
+    justify-content: space-between; /* ADICIONADO */
+    align-items: center; /* ADICIONADO */
+    margin-top: 25px; 
+    padding-top: 18px; 
+    border-top: 1px solid rgba(255, 255, 255, 0.1); 
+    flex-shrink: 0; 
+}
 .modal-close-footer-btn {
     background: rgba(255, 255, 255, 0.08); color: #bbb; border: 1px solid rgba(255, 255, 255, 0.15);
     padding: 10px 25px; font-size: 0.95rem; font-weight: 500; border-radius: 10px; cursor: pointer;
     transition: all 0.2s ease; display: inline-block;
 }
 .modal-close-footer-btn:hover { background: rgba(255, 255, 255, 0.15); color: #ffffff; transform: translateY(-1px); box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2); }
+
+/* NOVO: Ações do rodapé e input escondido */
+.footer-actions-left {
+    display: flex;
+    gap: 10px;
+}
+.hidden-file-input {
+    display: none;
+}
+/* FIM DOS NOVOS ESTILOS */
+
 
 /* --- MEDIA QUERIES --- */
 @media (max-width: 650px) {
@@ -277,7 +294,6 @@ footer { text-align: center; padding: 25px; font-size: 0.85rem; color: rgba(255,
     }
     .btn-add-internal .icon { width: 18px; height: 18px; }
 
-    /* Ajustes dos filtros para celular */
     .list-controls { gap: 10px; margin-bottom: 15px; }
     .search-bar { min-width: 150px; } 
     .filter-group { 
@@ -314,8 +330,20 @@ footer { text-align: center; padding: 25px; font-size: 0.85rem; color: rgba(255,
     .btn-pagar-item { font-size: 1rem; width: auto; min-width: 36px; padding: 0 8px;} 
     .btn-pagar-item:disabled { font-size: 0.75rem; min-width: 45px; padding: 5px; }
     .shopping-list-total { font-size: 1.1rem; margin-top: 20px; padding-top: 15px;}
+    
+    /* Ajuste do Rodapé no Celular */
     .modal-footer { margin-top: 20px; padding-top: 15px;}
     .modal-close-footer-btn { padding: 10px 20px; font-size: 0.9rem;}
+    /* Ajusta botões de import/export para terem o mesmo tamanho */
+    .footer-actions-left .modal-close-footer-btn { 
+        flex-grow: 1; /* Faz 'Importar' e 'Exportar' dividirem o espaço */
+        text-align: center;
+        padding-left: 10px;
+        padding-right: 10px;
+    }
+    .modal-footer { flex-wrap: wrap; gap: 15px; justify-content: center; }
+    .modal-footer .modal-close-footer-btn { width: 100%; } /* Botão fechar fica com 100% */
+    .footer-actions-left { width: 100%; }
 }
 
 /* Animação de saída para modais */
