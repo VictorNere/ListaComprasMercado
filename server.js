@@ -215,13 +215,6 @@ app.delete('/api/list/:id', async (req, res) => {
     }
 });
 
-
-// --- Servir o App Estático (o front-end) ---
-app.use(express.static(path.join(__dirname))); 
-app.get('/', (req, res) => {
-  res.sendFile(path.join(__dirname, 'index.html'));
-});
-
 // --- Iniciar o Servidor ---
 // Conecta ao MongoDB ANTES de iniciar o servidor
 console.log("Conectando ao MongoDB...");
