@@ -251,7 +251,7 @@ footer { text-align: center; padding: 25px; font-size: 0.85rem; color: rgba(255,
     background: rgba(255, 255, 255, 0.08); color: #bbb; border: 1px solid rgba(255, 255, 255, 0.15);
     padding: 10px 25px; font-size: 0.95rem; font-weight: 500; border-radius: 10px; cursor: pointer;
     transition: all 0.2s ease; display: inline-block;
-    min-width: auto; /* <-- CORREÇÃO ADICIONADA AQUI */
+    min-width: auto; /* CORREÇÃO ADICIONADA */
 }
 .modal-close-footer-btn:hover { background: rgba(255, 255, 255, 0.15); color: #ffffff; transform: translateY(-1px); box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2); }
 
@@ -277,6 +277,98 @@ footer { text-align: center; padding: 25px; font-size: 0.85rem; color: rgba(255,
 .hidden-file-input {
     display: none;
 }
+
+/* NOVO: Estilos do Modal de Sincronização */
+.sync-modal-content {
+    gap: 20px;
+    padding-top: 30px;
+    padding-bottom: 30px;
+}
+.sync-modal-content h3 {
+    text-align: center;
+    font-size: 1.1rem;
+    color: rgba(255, 255, 255, 0.7);
+    font-weight: 500;
+}
+.sync-modal-content p {
+    font-size: 0.9rem;
+    color: rgba(255, 255, 255, 0.5);
+    text-align: center;
+    line-height: 1.5;
+}
+.sync-modal-content .form-group {
+    padding-top: 10px;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+.sync-id-display {
+    background: rgba(0, 0, 0, 0.3);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    padding: 15px;
+    border-radius: 8px;
+    font-family: monospace;
+    font-size: 1rem;
+    color: #23d5ab;
+    word-break: break-all;
+    text-align: center;
+    cursor: copy;
+}
+.sync-id-display:active {
+    background: rgba(0, 0, 0, 0.5);
+}
+
+/* ... (depois de .hidden-file-input) ... */
+
+/* NOVO: Estilos do QR Code e do Modal de Sincronização */
+.sync-modal-content {
+    gap: 20px;
+    padding-top: 30px;
+    padding-bottom: 30px;
+}
+.sync-modal-content h3 {
+    text-align: center;
+    font-size: 1.1rem;
+    color: rgba(255, 255, 255, 0.7);
+    font-weight: 500;
+    margin-top: 10px;
+}
+.sync-modal-content p {
+    font-size: 0.9rem;
+    color: rgba(255, 255, 255, 0.5);
+    text-align: center;
+    line-height: 1.5;
+}
+.sync-modal-content .form-group {
+    padding-top: 20px;
+    margin-top: 20px;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+#qrcode-container {
+    background: #ffffff;
+    padding: 15px;
+    border-radius: 8px;
+    margin: 0 auto;
+    width: fit-content; /* Se ajusta ao tamanho do QR Code */
+}
+#qrcode-canvas {
+    width: 200px !important;
+    height: 200px !important;
+}
+.sync-id-display {
+    background: rgba(0, 0, 0, 0.3);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    padding: 15px;
+    border-radius: 8px;
+    font-family: monospace;
+    font-size: 0.9rem; /* Levemente menor para caber */
+    color: #23d5ab;
+    word-break: break-all;
+    text-align: center;
+    cursor: copy;
+}
+.sync-id-display:active {
+    background: rgba(0, 0, 0, 0.5);
+}
+/* ... (antes de @media) ... */
 
 
 /* --- MEDIA QUERIES --- */
@@ -372,3 +464,4 @@ footer { text-align: center; padding: 25px; font-size: 0.85rem; color: rgba(255,
 .modal-closing .modal-content { animation: slideOut 0.25s ease-out forwards; }
 @keyframes fadeOut { to { opacity: 0; } }
 @keyframes slideOut { to { transform: translateY(-20px) scale(0.98); opacity: 0; } }
+
