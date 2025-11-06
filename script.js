@@ -1,8 +1,8 @@
 document.addEventListener('DOMContentLoaded', () => {
     
     // --- Configurações da API ---
-    // A URL base agora é relativa, funcionando em localhost E na Vercel.
-    const API_BASE_URL = '/api/list';
+    // APONTADO PARA O SERVIDOR LOCAL
+    const API_BASE_URL = 'http://localhost:3000/api/list';
     let currentListId = null; // O 'ID Secreto' da nossa lista
 
     // --- Variáveis Globais ---
@@ -50,10 +50,19 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- LÓGICA DE API (Substituindo o localStorage) ---
 
+    // Função auxiliar para obter a URL correta da API (para celular)
+    const getApiUrl = (path = '') => {
+        // Se estiver no celular, troca 'localhost' pelo IP da LAN
+        const apiUrl = (window.location.hostname !== "localhost") 
+            ? API_BASE_URL.replace("localhost", window.location.hostname) 
+            : API_BASE_URL;
+        return `${apiUrl}${path}`;
+    };
+
     // 1. Carrega a lista da API
     const loadListFromAPI = async (listId) => {
         try {
-            const response = await fetch(`${API_BASE_URL}/${listId}`);
+            const response = await fetch(getApiUrl(`/${listId}`));
             
             if (response.status === 404) {
                 console.warn("Lista (ID) não encontrada no servidor. Criando uma nova.");
@@ -71,7 +80,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         } catch (error) {
             console.error("Erro ao carregar lista da API:", error);
-            alert("Erro de conexão com o servidor. Verifique se ele está rodando.");
+            alert("Erro de conexão com o servidor. Verifique se ele está rodando e se você está na mesma rede Wi-Fi.");
         }
     };
 
@@ -79,8 +88,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const createNewList = async () => {
         try {
             console.log("Nenhum ID local encontrado. Criando nova lista no servidor...");
-            // CORRIGIDO: O servidor espera um GET para esta rota
-            const response = await fetch(`${API_BASE_URL}/new`); 
+            const response = await fetch(getApiUrl('/new')); 
             if (!response.ok) throw new Error('Falha ao criar nova lista.');
             
             const data = await response.json();
@@ -155,7 +163,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         try {
-            const response = await fetch(`${API_BASE_URL}/${currentListId}/item`, {
+            const response = await fetch(getApiUrl(`/${currentListId}/item`), {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(newItemData)
@@ -329,7 +337,7 @@ document.addEventListener('DOMContentLoaded', () => {
         updateListView();
     };
 
-    // --- NOVO: Modal de Sincronização (COM QRCODE) ---
+    // --- Modal de Sincronização (COM QRCODE) ---
     const createSyncModal = () => {
         const modalContainer = createElement('div', 'modal-container sync-modal', { style: 'z-index: 1010;' });
         const modalBackdrop = createElement('div', 'modal-backdrop', { style: 'z-index: 1011;' });
@@ -458,7 +466,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         
         try {
-            const response = await fetch(`${API_BASE_URL}/${currentListId}/item/${itemId}`, {
+            const response = await fetch(getApiUrl(`/${currentListId}/item/${itemId}`), {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(updatedData)
@@ -484,7 +492,7 @@ document.addEventListener('DOMContentLoaded', () => {
         
         if (window.confirm(`Excluir "${item.name}"?`)) {
             try {
-                const response = await fetch(`${API_BASE_URL}/${currentListId}/item/${itemId}`, {
+                const response = await fetch(getApiUrl(`/${currentListId}/item/${itemId}`), {
                     method: 'DELETE'
                 });
                 if (!response.ok) throw new Error('Falha ao deletar item.');
@@ -550,7 +558,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const updatedData = { price: finalPrice, paid: true };
 
         try {
-            const response = await fetch(`${API_BASE_URL}/${currentListId}/item/${itemId}`, {
+            const response = await fetch(getApiUrl(`/${currentListId}/item/${itemId}`), {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(updatedData)
@@ -573,7 +581,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const resetData = async () => { 
          if (window.confirm("Apagar TODA a lista? Esta ação não pode ser desfeita.")) {
             try {
-                const response = await fetch(`${API_BASE_URL}/${currentListId}`, {
+                const response = await fetch(getApiUrl(`/${currentListId}`), {
                     method: 'DELETE'
                 });
                 if (!response.ok) throw new Error('Falha ao resetar a lista no servidor.');
@@ -621,7 +629,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
                 if (window.confirm("Isso irá substituir sua lista atual. Deseja continuar?")) {
                     
-                    const response = await fetch(`${API_BASE_URL}/${currentListId}/sync`, {
+                    const response = await fetch(getApiUrl(`/${currentListId}/sync`), {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify(importedList)
