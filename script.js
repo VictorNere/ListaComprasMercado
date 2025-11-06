@@ -173,13 +173,18 @@ document.addEventListener('DOMContentLoaded', () => {
         const totalDiv = createElement('div', 'shopping-list-total');
         totalDiv.innerHTML = `Total: <span>R$ ${currentTotal.toFixed(2)}</span>`;
         
-        // --- INÍCIO DA ATUALIZAÇÃO DO RODAPÉ ---
         const footer = createElement('div', 'modal-footer');
             
-        // Botões de Ação (Import/Export)
         const footerActionsLeft = createElement('div', 'footer-actions-left');
-        const btnImport = createElement('button', 'modal-close-footer-btn', { title: 'Importar lista' }, ['Importar']);
-        const btnExport = createElement('button', 'modal-close-footer-btn', { title: 'Exportar lista' }, ['Exportar']);
+        
+        // --- INÍCIO DA ATUALIZAÇÃO DOS BOTÕES ---
+        const btnImport = createElement('button', 'modal-close-footer-btn', { title: 'Importar lista' });
+        btnImport.innerHTML = `<svg class="icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5m-13.5-9L12 3m0 0 4.5 4.5M12 3v13.5" /></svg> <span>Imp</span>`;
+        
+        const btnExport = createElement('button', 'modal-close-footer-btn', { title: 'Exportar lista' });
+        btnExport.innerHTML = `<svg class="icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5M16.5 12 12 16.5m0 0L7.5 12m4.5 4.5V3" /></svg> <span>Exp</span>`;
+        // --- FIM DA ATUALIZAÇÃO DOS BOTÕES ---
+
         const importInput = createElement('input', 'hidden-file-input', { type: 'file', accept: '.json' });
         
         btnImport.addEventListener('click', () => importInput.click());
@@ -188,12 +193,10 @@ document.addEventListener('DOMContentLoaded', () => {
         
         footerActionsLeft.append(btnImport, btnExport, importInput);
         
-        // Botão Fechar
         const closeButton = createElement('button', 'modal-close-footer-btn', { type: 'button' }, ['Fechar']);
         closeButton.addEventListener('click', () => closeAndDestroyModal());
 
         footer.append(footerActionsLeft, closeButton);
-        // --- FIM DA ATUALIZAÇÃO DO RODAPÉ ---
         
         
         const updateListView = () => {
@@ -420,7 +423,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
 
-    // --- NOVO: Funções de Import/Export ---
     const exportList = () => {
         if (shoppingList.length === 0) {
             alert("Sua lista está vazia. Adicione itens antes de exportar.");
@@ -448,7 +450,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         if (!file.type.includes('json')) {
             alert('Erro: O arquivo selecionado não é .json.');
-            event.target.value = null; // Reseta o input
+            event.target.value = null; 
             return;
         }
         
@@ -462,7 +464,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
 
                 if (window.confirm("Isso irá substituir sua lista atual. Deseja continuar?")) {
-                    // Sanitiza a lista importada (mesma lógica do loadListFromStorage)
                     shoppingList = importedList.map(item => ({
                          name: item.name || 'Nome Inválido',
                          quantity: item.quantity || 1,
@@ -474,7 +475,6 @@ document.addEventListener('DOMContentLoaded', () => {
                     saveListToStorage();
                     recalculateTotal();
                     
-                    // Recarrega o modal principal
                     closeAndDestroyModal('.modal-container');
                     createMainListModal();
                 }
@@ -483,13 +483,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 console.error("Erro ao importar:", error);
                 alert("Erro ao ler o arquivo. Verifique se o JSON é válido.");
             } finally {
-                event.target.value = null; // Reseta o input para permitir importar o mesmo arquivo de novo
+                event.target.value = null; 
             }
         };
         
         reader.readAsText(file);
     };
-    // --- FIM DAS NOVAS FUNÇÕES ---
 
 
     // --- Inicialização e Event Listeners Principais ---

@@ -239,10 +239,9 @@ footer { text-align: center; padding: 25px; font-size: 0.85rem; color: rgba(255,
 
 /* --- BOTÃO FECHAR NOS MODAIS (CENTRALIZADO) --- */
 .modal-footer {
-    /* text-align: center; */ /* REMOVIDO */
-    display: flex; /* ADICIONADO */
-    justify-content: space-between; /* ADICIONADO */
-    align-items: center; /* ADICIONADO */
+    display: flex; 
+    justify-content: space-between; 
+    align-items: center; 
     margin-top: 25px; 
     padding-top: 18px; 
     border-top: 1px solid rgba(255, 255, 255, 0.1); 
@@ -252,18 +251,32 @@ footer { text-align: center; padding: 25px; font-size: 0.85rem; color: rgba(255,
     background: rgba(255, 255, 255, 0.08); color: #bbb; border: 1px solid rgba(255, 255, 255, 0.15);
     padding: 10px 25px; font-size: 0.95rem; font-weight: 500; border-radius: 10px; cursor: pointer;
     transition: all 0.2s ease; display: inline-block;
+    min-width: auto; /* <-- CORREÇÃO ADICIONADA AQUI */
 }
 .modal-close-footer-btn:hover { background: rgba(255, 255, 255, 0.15); color: #ffffff; transform: translateY(-1px); box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2); }
 
-/* NOVO: Ações do rodapé e input escondido */
+/* Ações do rodapé e input escondido */
 .footer-actions-left {
     display: flex;
     gap: 10px;
 }
+.footer-actions-left .modal-close-footer-btn {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 8px;
+    padding-left: 15px;
+    padding-right: 15px;
+}
+.footer-actions-left .modal-close-footer-btn .icon {
+    width: 20px;
+    height: 20px;
+    flex-shrink: 0;
+}
+
 .hidden-file-input {
     display: none;
 }
-/* FIM DOS NOVOS ESTILOS */
 
 
 /* --- MEDIA QUERIES --- */
@@ -331,19 +344,27 @@ footer { text-align: center; padding: 25px; font-size: 0.85rem; color: rgba(255,
     .btn-pagar-item:disabled { font-size: 0.75rem; min-width: 45px; padding: 5px; }
     .shopping-list-total { font-size: 1.1rem; margin-top: 20px; padding-top: 15px;}
     
-    /* Ajuste do Rodapé no Celular */
-    .modal-footer { margin-top: 20px; padding-top: 15px;}
-    .modal-close-footer-btn { padding: 10px 20px; font-size: 0.9rem;}
-    /* Ajusta botões de import/export para terem o mesmo tamanho */
-    .footer-actions-left .modal-close-footer-btn { 
-        flex-grow: 1; /* Faz 'Importar' e 'Exportar' dividirem o espaço */
-        text-align: center;
-        padding-left: 10px;
-        padding-right: 10px;
+    .modal-footer { 
+        margin-top: 20px; 
+        padding-top: 15px;
+        flex-wrap: wrap; 
+        gap: 15px; 
+        justify-content: center; 
     }
-    .modal-footer { flex-wrap: wrap; gap: 15px; justify-content: center; }
-    .modal-footer .modal-close-footer-btn { width: 100%; } /* Botão fechar fica com 100% */
-    .footer-actions-left { width: 100%; }
+    .modal-close-footer-btn { 
+        padding: 10px 20px; 
+        font-size: 0.9rem;
+    }
+    .footer-actions-left .modal-close-footer-btn { 
+        flex: 1;         
+        padding: 10px 12px;
+    }
+    .footer-actions-left { 
+        width: 100%; 
+    }
+    .modal-footer > .modal-close-footer-btn { 
+        width: 100%; 
+    }
 }
 
 /* Animação de saída para modais */
