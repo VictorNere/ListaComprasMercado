@@ -1,14 +1,10 @@
 document.addEventListener('DOMContentLoaded', () => {
     
-    // --- Configurações da API ---
-    // APONTADO PARA O SERVIDOR LOCAL
-    const API_BASE_URL = 'http://localhost:3000/api/list';
-    let currentListId = null; // O 'ID Secreto' da nossa lista
-
-    // --- Variáveis Globais ---
+    // --- Configurações Locais ---
     let shoppingList = [];
     let activeParticleIntervals = [];
     let currentTotal = 0.0;
+    const STORAGE_KEY = 'minhaListaDeCompras'; // Chave do localStorage
 
     // --- Seletores de Elementos Principais ---
     const btnAcessar = document.getElementById('btn-acessar'); 
@@ -48,63 +44,42 @@ document.addEventListener('DOMContentLoaded', () => {
         return element;
     };
 
-    // --- LÓGICA DE API (Substituindo o localStorage) ---
+    // --- LÓGICA DE DADOS (localStorage) ---
 
-    // Função auxiliar para obter a URL correta da API (para celular)
-    const getApiUrl = (path = '') => {
-        // Se estiver no celular, troca 'localhost' pelo IP da LAN
-        const apiUrl = (window.location.hostname !== "localhost") 
-            ? API_BASE_URL.replace("localhost", window.location.hostname) 
-            : API_BASE_URL;
-        return `${apiUrl}${path}`;
-    };
-
-    // 1. Carrega a lista da API
-    const loadListFromAPI = async (listId) => {
+    // 1. Salva a lista no localStorage
+    const saveListToStorage = () => {
         try {
-            const response = await fetch(getApiUrl(`/${listId}`));
-            
-            if (response.status === 404) {
-                console.warn("Lista (ID) não encontrada no servidor. Criando uma nova.");
-                localStorage.removeItem('minhaListaDeComprasID');
-                await createNewList(); 
-                return;
-            }
-            if (!response.ok) {
-                throw new Error('Falha ao buscar a lista.');
-            }
-            
-            shoppingList = await response.json();
-            currentListId = listId;
-            recalculateTotal();
-
-        } catch (error) {
-            console.error("Erro ao carregar lista da API:", error);
-            alert("Erro de conexão com o servidor. Verifique se ele está rodando e se você está na mesma rede Wi-Fi.");
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(shoppingList));
+        } catch (error) { 
+            console.error("Erro ao salvar:", error); 
+            alert("Erro ao salvar a lista!"); 
         }
     };
 
-    // 2. Cria uma nova lista no servidor (se for o primeiro acesso)
-    const createNewList = async () => {
+    // 2. Carrega a lista do localStorage
+    const loadListFromStorage = () => {
         try {
-            console.log("Nenhum ID local encontrado. Criando nova lista no servidor...");
-            const response = await fetch(getApiUrl('/new')); 
-            if (!response.ok) throw new Error('Falha ao criar nova lista.');
-            
-            const data = await response.json();
-            currentListId = data.listId;
-            localStorage.setItem('minhaListaDeComprasID', currentListId);
-            shoppingList = []; // Começa com lista vazia
+            const savedList = localStorage.getItem(STORAGE_KEY);
+            shoppingList = savedList ? JSON.parse(savedList) : []; 
+            // Sanitiza os dados (garante que todos os campos existam)
+            shoppingList = shoppingList.map((item, index) => ({
+                 itemId: item.itemId || `item-${Date.now()}-${index}`, // Adiciona um ID se não tiver
+                 name: item.name || 'Nome Inválido',
+                 quantity: item.quantity || 1,
+                 observation: item.observation || '',
+                 paid: item.paid || false,
+                 price: item.price || 0
+             }));
             recalculateTotal();
-            console.log(`Nova lista criada e salva localmente: ${currentListId}`);
-
-        } catch (error) {
-            console.error("Erro ao criar nova lista:", error);
-            alert("Erro fatal ao criar lista no servidor.");
+        } catch (error) { 
+            console.error("Erro ao carregar:", error); 
+            shoppingList = []; 
+            alert("Erro ao carregar a lista salva! A lista foi resetada."); 
+            localStorage.removeItem(STORAGE_KEY); 
         }
     };
 
-    // 3. Recalcula o total (baseado na variável global 'shoppingList')
+    // 3. Recalcula o total
     const recalculateTotal = () => {
         currentTotal = shoppingList.reduce((sum, item) => sum + (item.paid && item.price ? item.price : 0), 0);
         const totalDiv = document.querySelector('.shopping-list-total span');
@@ -144,7 +119,8 @@ document.addEventListener('DOMContentLoaded', () => {
         closeButton.addEventListener('click', () => closeAndDestroyModal('.add-modal'));
     };
     
-    const addItemToList = async (e) => { 
+    // ATUALIZADO: Salva no localStorage
+    const addItemToList = (e) => { 
         e.preventDefault();
         const form = e.target;
         const itemNameInput = form.querySelector('#item-name-input');
@@ -152,9 +128,12 @@ document.addEventListener('DOMContentLoaded', () => {
         const itemObsInput = form.querySelector('#item-obs-input');
         
         const newItemData = {
+            itemId: `item-${Date.now()}`,
             name: itemNameInput.value.trim(),
             quantity: parseInt(itemQtyInput.value, 10),
-            observation: itemObsInput.value.trim()
+            observation: itemObsInput.value.trim(),
+            paid: false,
+            price: 0
         };
         
         if (!newItemData.name || isNaN(newItemData.quantity) || newItemData.quantity < 1) {
@@ -162,25 +141,13 @@ document.addEventListener('DOMContentLoaded', () => {
              return;
         }
 
-        try {
-            const response = await fetch(getApiUrl(`/${currentListId}/item`), {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(newItemData)
-            });
-            if (!response.ok) throw new Error('Falha ao adicionar item.');
-
-            shoppingList = await response.json(); 
-            recalculateTotal();
+        shoppingList.push(newItemData);
+        saveListToStorage();
+        recalculateTotal();
             
-            closeAndDestroyModal('.modal-container'); 
-            createMainListModal(); 
-            closeAndDestroyModal('.add-modal');
-
-        } catch (error) {
-            console.error("Erro ao adicionar item:", error);
-            alert("Erro ao salvar item. Tente novamente.");
-        }
+        closeAndDestroyModal('.modal-container'); 
+        createMainListModal(); 
+        closeAndDestroyModal('.add-modal');
     };
 
     
@@ -228,7 +195,6 @@ document.addEventListener('DOMContentLoaded', () => {
         totalDiv.innerHTML = `Total: <span>R$ ${currentTotal.toFixed(2)}</span>`;
         
         const footer = createElement('div', 'modal-footer');
-            
         const footerActionsLeft = createElement('div', 'footer-actions-left');
         
         const btnImport = createElement('button', 'modal-close-footer-btn', { title: 'Importar lista de arquivo .json' });
@@ -237,17 +203,15 @@ document.addEventListener('DOMContentLoaded', () => {
         const btnExport = createElement('button', 'modal-close-footer-btn', { title: 'Exportar lista para arquivo .json' });
         btnExport.innerHTML = `<svg class="icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5M16.5 12 12 16.5m0 0L7.5 12m4.5 4.5V3" /></svg> <span>Exp</span>`;
 
-        const btnSync = createElement('button', 'modal-close-footer-btn btn-sync', { title: 'Sincronizar com outro dispositivo' });
-        btnSync.innerHTML = `<svg class="icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M7.5 21 3 16.5m0 0L7.5 12M3 16.5h13.5m0-13.5L21 7.5m0 0L16.5 12M21 7.5H7.5" /></svg> <span>Sinc</span>`;
+        // REMOVIDO o botão Sinc
 
         const importInput = createElement('input', 'hidden-file-input', { type: 'file', accept: '.json' });
         
         btnImport.addEventListener('click', () => importInput.click());
         btnExport.addEventListener('click', exportList);
-        btnSync.addEventListener('click', createSyncModal); 
         importInput.addEventListener('change', (e) => importList(e));
         
-        footerActionsLeft.append(btnImport, btnExport, btnSync, importInput); 
+        footerActionsLeft.append(btnImport, btnExport, importInput); // REMOVIDO btnSync
         
         const closeButton = createElement('button', 'modal-close-footer-btn', { type: 'button' }, ['Fechar']);
         closeButton.addEventListener('click', () => closeAndDestroyModal());
@@ -337,77 +301,7 @@ document.addEventListener('DOMContentLoaded', () => {
         updateListView();
     };
 
-    // --- Modal de Sincronização (COM QRCODE) ---
-    const createSyncModal = () => {
-        const modalContainer = createElement('div', 'modal-container sync-modal', { style: 'z-index: 1010;' });
-        const modalBackdrop = createElement('div', 'modal-backdrop', { style: 'z-index: 1011;' });
-        const modalContent = createElement('div', 'modal-content sync-modal-content', { style: 'z-index: 1012; max-width: 550px;' });
-
-        const title = createElement('h2', '', {}, ['Sincronizar Dispositivo']);
-        const desc1 = createElement('p', '', {}, ['Escaneie este QR Code com seu outro dispositivo para usar a mesma lista.']);
-        
-        // Container do QR Code
-        const qrContainer = createElement('div', '', { id: 'qrcode-container' });
-        const qrCanvas = createElement('canvas', '', { id: 'qrcode-canvas' });
-        qrContainer.appendChild(qrCanvas);
-
-        // Título e ID copiável
-        const titleId = createElement('h3', '', {}, ['Ou copie seu ID Secreto:']);
-        const idDisplay = createElement('div', 'sync-id-display', { title: 'Clique para copiar' }, [currentListId]);
-        idDisplay.addEventListener('click', () => {
-            navigator.clipboard.writeText(currentListId).then(() => {
-                alert("ID copiado para a área de transferência!");
-            }).catch(err => {
-                console.warn("Falha ao copiar ID:", err);
-            });
-        });
-
-        // Seção para colar um novo ID
-        const formGroup = createElement('div', 'form-group');
-        const label = createElement('label', '', { for: 'sync-id-input' }, ['Sincronizar com um ID existente:']);
-        const input = createElement('input', '', { type: 'text', id: 'sync-id-input', placeholder: 'Cole o ID de outra lista aqui...' });
-        formGroup.append(label, input);
-
-        const syncButton = createElement('button', 'modal-add-btn', { type: 'button' }, ['Sincronizar']);
-        syncButton.addEventListener('click', () => {
-            const newId = input.value.trim();
-            if (newId && newId.length > 10) { 
-                if (window.confirm("Isso fará este dispositivo usar a nova lista. A lista atual (se for diferente) não será apagada do servidor, mas você perderá o acesso a ela neste dispositivo a menos que salve o ID atual. Continuar?")) {
-                    localStorage.setItem('minhaListaDeComprasID', newId);
-                    location.reload();
-                }
-            } else {
-                alert("Por favor, insira um ID de lista válido.");
-            }
-        });
-
-        const footer = createElement('div', 'modal-footer');
-        const closeButton = createElement('button', 'modal-close-footer-btn', { type: 'button' }, ['Fechar']);
-        footer.appendChild(closeButton);
-
-        modalContent.append(title, desc1, qrContainer, titleId, idDisplay, formGroup, syncButton, footer);
-        modalContainer.append(modalBackdrop, modalContent);
-        document.body.appendChild(modalContainer);
-
-        // Gera o QR Code
-        try {
-            // Verifica se a biblioteca QRCode foi carregada
-            if (typeof QRCode !== 'undefined') {
-                QRCode.toCanvas(qrCanvas, currentListId, { width: 200, margin: 1 }, (error) => {
-                    if (error) console.error("Erro ao gerar QR Code:", error);
-                });
-            } else {
-                console.error("Biblioteca QRCode não foi carregada. Verifique o <script> no index.html.");
-                qrContainer.innerHTML = "Erro ao carregar QR Code.";
-            }
-        } catch (err) {
-            console.error(err);
-        }
-
-        modalBackdrop.addEventListener('click', () => closeAndDestroyModal('.sync-modal'));
-        closeButton.addEventListener('click', () => closeAndDestroyModal('.sync-modal'));
-    };
-
+    // REMOVIDO: createSyncModal() foi deletado.
 
     const createEditModal = (itemId) => { 
         const item = shoppingList.find(i => i.itemId === itemId);
@@ -445,8 +339,11 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('edit-item-name').focus();
     };
 
-    const saveEdit = async (e, itemId) => { 
+    // ATUALIZADO: Salva no localStorage
+    const saveEdit = (e, itemId) => { 
         e.preventDefault();
+        const itemIndex = shoppingList.findIndex(i => i.itemId === itemId);
+        if (itemIndex === -1) return;
         
         const newNameInput = document.getElementById('edit-item-name');
         const newQtyInput = document.getElementById('edit-item-qty');
@@ -465,48 +362,29 @@ document.addEventListener('DOMContentLoaded', () => {
              return;
         }
         
-        try {
-            const response = await fetch(getApiUrl(`/${currentListId}/item/${itemId}`), {
-                method: 'PUT',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(updatedData)
-            });
-            if (!response.ok) throw new Error('Falha ao salvar edição.');
-            
-            shoppingList = await response.json(); 
-            recalculateTotal();
+        // Atualiza o item no array
+        shoppingList[itemIndex] = { ...shoppingList[itemIndex], ...updatedData };
+        saveListToStorage();
+        recalculateTotal();
 
-            closeAndDestroyModal('.edit-modal');
-            closeAndDestroyModal('.modal-container'); 
-            createMainListModal(); 
-        
-        } catch (error) {
-            console.error("Erro ao salvar edição:", error);
-            alert("Erro ao salvar. Tente novamente.");
-        }
+        closeAndDestroyModal('.edit-modal');
+        closeAndDestroyModal('.modal-container'); 
+        createMainListModal(); 
     };
 
-    const deleteItem = async (itemId) => { 
-        const item = shoppingList.find(i => i.itemId === itemId);
-        if (!item) return;
+    // ATUALIZADO: Salva no localStorage
+    const deleteItem = (itemId) => { 
+        const itemIndex = shoppingList.findIndex(i => i.itemId === itemId);
+        if (itemIndex === -1) return;
         
+        const item = shoppingList[itemIndex];
         if (window.confirm(`Excluir "${item.name}"?`)) {
-            try {
-                const response = await fetch(getApiUrl(`/${currentListId}/item/${itemId}`), {
-                    method: 'DELETE'
-                });
-                if (!response.ok) throw new Error('Falha ao deletar item.');
-
-                shoppingList = await response.json(); 
-                recalculateTotal();
-                
-                closeAndDestroyModal('.modal-container'); 
-                createMainListModal(); 
+            shoppingList.splice(itemIndex, 1); // Remove do array
+            saveListToStorage();
+            recalculateTotal();
             
-            } catch (error) {
-                console.error("Erro ao deletar item:", error);
-                alert("Erro ao deletar. Tente novamente.");
-            }
+            closeAndDestroyModal('.modal-container'); 
+            createMainListModal(); 
         }
     };
 
@@ -539,10 +417,11 @@ document.addEventListener('DOMContentLoaded', () => {
         cancelButton.addEventListener('click', () => closeAndDestroyModal('.price-modal'));
     };
     
-    const confirmPrice = async (e, itemId) => { 
+    // ATUALIZADO: Salva no localStorage
+    const confirmPrice = (e, itemId) => { 
         e.preventDefault();
-        const item = shoppingList.find(i => i.itemId === itemId);
-        if (!item) return;
+        const itemIndex = shoppingList.findIndex(i => i.itemId === itemId);
+        if (itemIndex === -1) return;
 
         const priceInput = document.getElementById('item-price-input');
         const price = parseFloat(priceInput.value);
@@ -554,48 +433,28 @@ document.addEventListener('DOMContentLoaded', () => {
             return; 
         } 
         
-        const finalPrice = (type === 'unit') ? (price * item.quantity) : price;
-        const updatedData = { price: finalPrice, paid: true };
-
-        try {
-            const response = await fetch(getApiUrl(`/${currentListId}/item/${itemId}`), {
-                method: 'PUT',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(updatedData)
-            });
-            if (!response.ok) throw new Error('Falha ao confirmar preço.');
-
-            shoppingList = await response.json(); 
-            recalculateTotal();
+        const finalPrice = (type === 'unit') ? (price * shoppingList[itemIndex].quantity) : price;
+        
+        shoppingList[itemIndex].price = finalPrice;
+        shoppingList[itemIndex].paid = true;
+        
+        saveListToStorage();
+        recalculateTotal();
             
-            closeAndDestroyModal('.price-modal');
-            closeAndDestroyModal('.modal-container'); 
-            createMainListModal(); 
-
-        } catch (error) {
-            console.error("Erro ao confirmar preço:", error);
-            alert("Erro ao salvar preço. Tente novamente.");
-        }
+        closeAndDestroyModal('.price-modal');
+        closeAndDestroyModal('.modal-container'); 
+        createMainListModal(); 
     };
 
-    const resetData = async () => { 
+    // ATUALIZADO: Limpa o localStorage
+    const resetData = () => { 
          if (window.confirm("Apagar TODA a lista? Esta ação não pode ser desfeita.")) {
-            try {
-                const response = await fetch(getApiUrl(`/${currentListId}`), {
-                    method: 'DELETE'
-                });
-                if (!response.ok) throw new Error('Falha ao resetar a lista no servidor.');
-
-                localStorage.removeItem('minhaListaDeComprasID');
-                location.reload(); 
-            
-            } catch (error) {
-                 console.error("Erro ao resetar lista:", error);
-                 alert("Erro ao resetar a lista. Tente novamente.");
-            }
+            localStorage.removeItem(STORAGE_KEY);
+            location.reload(); 
         }
     };
 
+    // Exportar: Já funciona lendo a variável global
     const exportList = () => {
         if (shoppingList.length === 0) {
             alert("Sua lista está vazia. Adicione itens antes de exportar.");
@@ -611,6 +470,7 @@ document.addEventListener('DOMContentLoaded', () => {
         URL.revokeObjectURL(url);
     };
 
+    // ATUALIZADO: Importar salva no localStorage
     const importList = (event) => {
         const file = event.target.files[0];
         if (!file) return;
@@ -621,7 +481,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         
         const reader = new FileReader();
-        reader.onload = async (e) => {
+        reader.onload = (e) => {
             try {
                 const importedList = JSON.parse(e.target.result);
                 if (!Array.isArray(importedList)) {
@@ -629,14 +489,17 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
                 if (window.confirm("Isso irá substituir sua lista atual. Deseja continuar?")) {
                     
-                    const response = await fetch(getApiUrl(`/${currentListId}/sync`), {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify(importedList)
-                    });
-                    if (!response.ok) throw new Error('Falha ao sincronizar a lista com o servidor.');
-
-                    shoppingList = await response.json(); 
+                    // Sanitiza e salva no localStorage
+                    shoppingList = importedList.map((item, index) => ({
+                         itemId: item.itemId || `item-${Date.now()}-${index}`,
+                         name: item.name || 'Nome Inválido',
+                         quantity: item.quantity || 1,
+                         observation: item.observation || '',
+                         paid: item.paid || false,
+                         price: item.price || 0
+                     }));
+                    
+                    saveListToStorage();
                     recalculateTotal();
                     
                     closeAndDestroyModal('.modal-container');
@@ -655,12 +518,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- Inicialização e Event Listeners Principais ---
     const initializeApp = () => {
-        const localListId = localStorage.getItem('minhaListaDeComprasID');
-        if (localListId) {
-            loadListFromAPI(localListId);
-        } else {
-            createNewList();
-        }
+        loadListFromStorage(); // Carrega do localStorage ao iniciar
     };
     
     btnAcessar.addEventListener('click', () => { 

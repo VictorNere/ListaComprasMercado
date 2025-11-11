@@ -10,9 +10,7 @@
     <link rel="stylesheet" href="style.css?v=11"> 
     <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><circle cx=%2250%22 cy=%2250%22 r=%2245%22 fill=%22none%22 stroke=%22rgba(255,255,255,0.8)%22 stroke-width=%228%22/></svg>">
     <link rel="manifest" href="manifest.json">
-    
-    <script src="https://cdn.jsdelivr.net/npm/qrcode@1.4.4/build/qrcode.min.js"></script>
-</head>
+    </head>
 <body>
 
     <button id="btn-reset" class="reset-btn" title="Resetar Lista">
@@ -39,6 +37,14 @@
         <p>&copy; 2025 Victor Gustavo Santin. Todos os direitos reservados.</p>
     </footer>
 
+    <script>
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+          navigator.serviceWorker.register('/service-worker.js').then(reg => console.log('SW reg OK:', reg.scope)).catch(err => console.log('SW reg Falha:', err));
+        });
+      }
+    </script> 
+    
     <script src="script.js"></script>
 
 </body>
